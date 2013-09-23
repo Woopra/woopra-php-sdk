@@ -217,7 +217,6 @@ class Woopra {
 			}
 			$url = $base_url . "ce/" . $config_params . $user_params . $event_params;
 		}
-		echo $url . "\n";
 
 		//Send the request
 		file_get_contents( $url );
