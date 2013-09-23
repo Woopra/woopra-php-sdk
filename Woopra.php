@@ -25,6 +25,8 @@ class Woopra {
 	* outgoing_pause (integer) - Time in millisecond to pause the browser to ensure that the event is tracked when visitor clicks on an outgoing url
 	* ignore_query_url (boolean) - Ignores the query part of the url when the standard pageviews tracking function track()
 	* hide_campaign (boolean) - Enabling this option will remove campaign properties from the URL when they’re captured (using HTML5 pushState)
+	* ip_address (string) - the IP address of the user viewing the page. If back-end processing, always set this manually.
+	* cookie_value (string) - the value of $_COOKIE["wooTracker"] if it has been set.
 	* @var array
 	*/
 	private static $default_config = array(
@@ -40,7 +42,9 @@ class Woopra {
 											"download_pause" => 200,
 											"outgoing_pause" => 400,
 											"ignore_query_url" => true,
-											"hide_campaign" => false
+											"hide_campaign" => false,
+											"ip_address" => "",
+											"cookie_value" => ""
 		);
 
 	/**
@@ -101,6 +105,13 @@ class Woopra {
 
 		//Current configuration is Default
 		$this->current_config = Woopra::$default_config;
+
+		//Set the default IP
+		$this->current_config["ip_address"] = $_SERVER["REMOTE_ADDR"];
+
+		//Get cookie or generate a random one
+		$this->current_config["cookie_value"] = isset($_COOKIE["wooTracker"]) ? $_COOKIE["wooTracker"] : Woopra::RandomString();
+
 		
 	}
 
@@ -148,9 +159,74 @@ class Woopra {
 	}
 
 	/**
+	 * Random Cookie generator in case the user doesn't have a cookie yet. Better to use a hash of the email.
+	 * @param none
+	 * @return string
+	 */
+	private static function RandomString() {
+	    $characters = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+	    $randstring = "";
+	    for ($i = 0; $i < 12; $i++) {
+	        $randstring .= $characters[rand(0, strlen($characters)-1)];
+	    }
+	    return $randstring;
+	}
+
+
+
+	/**
+	 * Prepares the http request and sends it.
+	 * @param boolean Is this a tracking event or are we just identifying a user?
+	 * @param (optional) array
+	 * @return none
+	 */
+	private function woopra_http_request($is_tracking, $event = null) {
+
+		$base_url = "http://www.woopra.com/track/";
+
+		//Config params
+		$config_params = "?host=" . urlencode($this->current_config["domain"]);
+		$config_params .= "&cookie=" . urlencode($this->current_config["cookie_value"]);
+		$config_params .= "&ip=" . urlencode($this->current_config["ip_address"]);
+		$config_params .= "&timeout=" . urlencode($this->current_config["idle_timeout"]);
+
+		//User params
+		$user_params = "";
+		if ( isset($this->user) ) {
+			foreach($this->user as $option => $value) {
+				$user_params .= "&cv_" . urlencode($option) . "=" . urlencode($value);
+			}
+		}
+
+		//Just identifying
+		if ( ! $is_tracking ) {
+			$url = $base_url . "identify/" . $config_params . $user_params;
+
+		//Tracking
+		} else {
+
+			//Event params
+			$event_params = "";
+			if ( $event != null ) {
+				$event_params .= "&ce_name=" . urlencode($event[0]);
+				foreach($event[1] as $option => $value) {
+					$event_params .= "&ce_" . urlencode($option) . "=" . urlencode($value);
+				}
+			} else {
+				$event_params .= "&ce_name=pv&ce_url=" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+			}
+			$url = $base_url . "ce/" . $config_params . $user_params . $event_params;
+		}
+		echo $url . "\n";
+
+		//Send the request
+		file_get_contents( $url );
+	}
+
+	/**
 	 * Echoes Woopra Widget JS code, and checks if there is any stored Configuration, Identification, or Custom events awaiting process and echoes it too.
 	 * @param none
-	 * @return none
+	 * @return Woopra object
 	 */
 	public function woopra_widget() {
 
@@ -188,22 +264,22 @@ class Woopra {
 
 			?>
 
-			woopra.track();
-
 		</script>
 
 		<!-- Woopra code ends here -->
 
 		<?php
+		return $this;
 
 	}
 
 	/**
 	* Configures Woopra
 	* @param array
+	* @param (optional) boolean
 	* @return Woopra object
 	*/
-	public function config($args) {
+	public function config($args, $back_end_processing = false) {
 
 		$this->custom_config = array();
 		foreach( $args as $option => $value) {
@@ -232,7 +308,7 @@ class Woopra {
 				//Throw Exception
 			}
 		}
-		if ( $this->tracker_ready ) {
+		if ( $this->tracker_ready && ! $back_end_processing ) {
 			echo "<script>\n";
 			$this->print_javascript_configuration();
 			echo "\n</script>\n";
@@ -244,10 +320,15 @@ class Woopra {
 	* Identifies User
 	* @param array
 	* @return Woopra object
+	* @param (optional) boolean
 	*/
-	public function identify($identified_user) {
+	public function identify($identified_user, $back_end_processing = false) {
 
 		$this->user = $identified_user;
+		if ( $back_end_processing ) {
+			$this->woopra_http_request(false);
+			return $this;
+		}
 
 		if ( $this->tracker_ready ) {
 			echo "<script>\n";
@@ -258,14 +339,33 @@ class Woopra {
 	}
 
 	/**
-	* Tracks Custom Event
+	* Tracks Custom Event. If no parameters are specified, will simply track pageview.
 	* @param string
 	* @param array
+	* @param (optional) boolean
 	* @return Woopra object
 	*/
-	public function track($event, $args) {
+	public function track($event = null, $args = array(), $back_end_processing = false) {
 
-		$this->events = array();
+		if ( $back_end_processing ) {
+			$http_event = null;
+			if ( $event != null ) {
+				$http_event = array($event, $args);
+			}
+			$this->woopra_http_request(true, $http_event);
+			return $this;
+		}
+
+		if ($event == null) {
+			if ( $this->tracker_ready ) {
+				echo "<script>\nwoopra.track()\n</script>\n";
+			}
+			return $this;
+		}
+
+		if (! isset($this->events) ) {
+			$this->events = array();
+		}
 		array_push( $this->events, array($event, $args) );
 
 		if ( $this->tracker_ready ) {
