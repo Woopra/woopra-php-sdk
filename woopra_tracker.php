@@ -127,13 +127,11 @@ class WoopraTracker {
 	 * @return none
 	 */
 	private function print_javascript_configuration() {
-
-		$woopra_js_config = "woopra.config(".json_encode($this->custom_config).");";
-		echo $woopra_js_config;
-
+?>
+		woopra.config(<?php echo json_encode($this->custom_config); ?>);
+<?php
 		//Configuration has been printed, reset the custom_configuration as an empty array
 		unset( $this->custom_config );
-
 	}
 
 	/**
@@ -143,8 +141,9 @@ class WoopraTracker {
 	private function print_javascript_identification() {
 
 		if ( ! $this->user_up_to_date ) {
-			$woopra_js_identify = "woopra.identify(".json_encode($this->user).");";
-			echo $woopra_js_identify;
+?>
+		woopra.identify(<?php echo json_encode($this->user); ?>);
+<?php
 			$this->user_up_to_date = true;
 		}
 	}
@@ -158,9 +157,10 @@ class WoopraTracker {
 
 		$woopra_js_events = "";
 		foreach ($this->events as $event) {
-			$woopra_js_events .= "woopra.track(".json_encode($event[0]).", ".json_encode($event[1]).");\n	";
+?>
+		woopra.track(<?php echo json_encode($event[0]); ?>, <?php echo json_encode($event[1]); ?>); 
+<?php
 		}
-		echo $woopra_js_events;
 
 		//Events have been printed, reset the events as an empty array
 		unset( $this->events );
@@ -246,45 +246,38 @@ class WoopraTracker {
 	 */
 	public function woopra_code() {
 
-		?>
+?>
+	
+	<!-- Woopra code starts here -->
+	<script>
+		(function(){
+		var t,i,e,n=window,o=document,a=arguments,s="script",r=["config","track","identify","visit","push","call"],c=function(){var t,i=this;for(i._e=[],t=0;r.length>t;t++)(function(t){i[t]=function(){return i._e.push([t].concat(Array.prototype.slice.call(arguments,0))),i}})(r[t])};for(n._w=n._w||{},t=0;a.length>t;t++)n._w[a[t]]=n[a[t]]=n[a[t]]||new c;i=o.createElement(s),i.async=1,i.src="//static.woopra.com/js/w.js",e=o.getElementsByTagName(s)[0],e.parentNode.insertBefore(i,e)
+		})("woopra");
+<?php
 
-		<!-- Woopra code starts here -->
+		//The Tracker is now ready
+		$this->tracker_ready = true;
 
-		<script>
+		//Print Custom JavaScript Configuration Code
+		if ( isset($this->custom_config) ) {
+			$this->print_javascript_configuration();
+		}
 
-			(function(){
-			var t,i,e,n=window,o=document,a=arguments,s="script",r=["config","track","identify","visit","push","call"],c=function(){var t,i=this;for(i._e=[],t=0;r.length>t;t++)(function(t){i[t]=function(){return i._e.push([t].concat(Array.prototype.slice.call(arguments,0))),i}})(r[t])};for(n._w=n._w||{},t=0;a.length>t;t++)n._w[a[t]]=n[a[t]]=n[a[t]]||new c;i=o.createElement(s),i.async=1,i.src="//static.woopra.com/js/w.js",e=o.getElementsByTagName(s)[0],e.parentNode.insertBefore(i,e)
-			})("woopra");
+		//Print JavaScript Identification Code
+		if ( isset($this->user) ) {
+			$this->print_javascript_identification();
+		}
+		
+		//Print stored events
+		if ( isset($this->events) ) {
+			$this->print_javascript_events();
+		}
 
-			<?php
-
-				//The Tracker is now ready
-				$this->tracker_ready = true;
-
-				//Print Custom JavaScript Configuration Code
-				if ( isset($this->custom_config) ) {
-					$this->print_javascript_configuration();
-					echo "\n\n";
-				}
-
-				//Print JavaScript Identification Code
-				if ( isset($this->user) ) {
-					$this->print_javascript_identification();
-					echo "\n\n";
-				}
-				
-				//Print stored events
-				if ( isset($this->events) ) {
-					$this->print_javascript_events();
-				}
-
-			?>
-
-		</script>
-
-		<!-- Woopra code ends here -->
-
-		<?php
+?>
+	</script>
+	<!-- Woopra code ends here -->
+	
+<?php
 		return $this;
 
 	}
@@ -325,9 +318,13 @@ class WoopraTracker {
 			}
 		}
 		if ( $this->tracker_ready && ! $back_end_processing ) {
-			echo "<script>\n";
+?>
+	<script>
+<?php
 			$this->print_javascript_configuration();
-			echo "\n</script>\n";
+?>
+	<script>
+<?php
 		}
 		return $this;
 	}
@@ -365,7 +362,14 @@ class WoopraTracker {
 
 		if ($event == null) {
 			if ( $this->tracker_ready ) {
-				echo "<script>\nwoopra.track()\n</script>\n";
+?>
+	<script>
+<?php
+				$this->print_javascript_identification();
+?>
+		woopra.track();
+	</script>
+<?php
 			}
 			return $this;
 		}
@@ -376,10 +380,14 @@ class WoopraTracker {
 		array_push( $this->events, array($event, $args) );
 
 		if ( $this->tracker_ready ) {
-			echo "<script>\n";
+?>
+	<script>
+<?php
 			$this->print_javascript_identification();
 			$this->print_javascript_events();
-			echo "</script>\n";
+?>
+	</script>
+<?php
 		}
 		return $this;
 	}
@@ -396,16 +404,14 @@ class WoopraTracker {
 			$this->user_up_to_date = true;
 		} else {
 
-			?>
-
-			<script>
-
-				<?php $this->print_javascript_identification() ?>
-				woopra.push();
-
-			</script>
-
-			<?php
+?>
+	<script>
+<?php
+			$this->print_javascript_identification()
+?>
+		woopra.push();
+	</script>
+<?php
 		}
 	}
 
