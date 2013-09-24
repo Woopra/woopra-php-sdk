@@ -30,22 +30,22 @@ class WoopraTracker {
 	* @var array
 	*/
 	private static $default_config = array(
-											"domain" => "", 
-											"cookie_name" => "wooTracker",
-											"cookie_domain" => "",
-											"cookie_path" => "/",
-											"ping" => true,
-											"ping_interval" => 12000,
-											"idle_timeout" => 300000,
-											"download_tracking" => true,
-											"outgoing_tracking" => true,
-											"download_pause" => 200,
-											"outgoing_pause" => 400,
-											"ignore_query_url" => true,
-											"hide_campaign" => false,
-											"ip_address" => "",
-											"cookie_value" => ""
-		);
+		"domain" => "", 
+		"cookie_name" => "wooTracker",
+		"cookie_domain" => "",
+		"cookie_path" => "/",
+		"ping" => true,
+		"ping_interval" => 12000,
+		"idle_timeout" => 300000,
+		"download_tracking" => true,
+		"outgoing_tracking" => true,
+		"download_pause" => 200,
+		"outgoing_pause" => 400,
+		"ignore_query_url" => true,
+		"hide_campaign" => false,
+		"ip_address" => "",
+		"cookie_value" => ""
+	);
 
 	/**
 	* Custom configuration stack.
@@ -101,7 +101,7 @@ class WoopraTracker {
 	 * @return none
 	 * @constructor
 	 */
-	function __construct() {
+	function __construct($config_params = null) {
 
 		//Tracker is not ready yet
 		$this->tracker_ready = false;
@@ -120,6 +120,11 @@ class WoopraTracker {
 
 		//We don't have any info on the user yet, so he is up to date by default.
 		$this->user_up_to_date = true;
+
+		//If configuration array was passed, configure Woopra
+		if (isset($config_params)) {
+			$this->config($config_params);
+		}
 	}
 
 	/**
@@ -308,13 +313,11 @@ class WoopraTracker {
 
 				}
 				else {
-					unset( $custom_config );
-					//Throw Exception
+					trigger_error("Wrong value type in configuration array for parameter ".$option.". Recieved ".gettype($value).", expected ".gettype( WoopraTracker::$default_config[$option] ).".");
 				}
 			}
 			else {
-				unset( $custom_config );
-				//Throw Exception
+				trigger_error("Unexpected parameter in configuration array: ".$option.".");
 			}
 		}
 		if ( $this->tracker_ready && ! $back_end_processing ) {
