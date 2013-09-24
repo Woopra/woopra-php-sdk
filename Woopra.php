@@ -6,7 +6,7 @@
  * @version 1.0
  * @author Antoine Chkaiban
  */
-class Woopra {
+class WoopraTracker {
 
 	/**
 	* Default configuration.
@@ -75,6 +75,12 @@ class Woopra {
 	private $user;
 
 	/**
+	* Has the latest information on the user been sent to woopra?
+	* @var boolean
+	*/
+	private $user_up_to_date;
+
+	/**
 	* Events array stack
 	* Each item of the stack is an array(2)
 	* O (string) - the name of the event
@@ -104,15 +110,16 @@ class Woopra {
 		$this->domain_was_set = false;
 
 		//Current configuration is Default
-		$this->current_config = Woopra::$default_config;
+		$this->current_config = WoopraTracker::$default_config;
 
 		//Set the default IP
 		$this->current_config["ip_address"] = $_SERVER["REMOTE_ADDR"];
 
 		//Get cookie or generate a random one
-		$this->current_config["cookie_value"] = isset($_COOKIE["wooTracker"]) ? $_COOKIE["wooTracker"] : Woopra::RandomString();
+		$this->current_config["cookie_value"] = isset($_COOKIE["wooTracker"]) ? $_COOKIE["wooTracker"] : WoopraTracker::RandomString();
 
-		
+		//We don't have any info on the user yet, so he is up to date by default.
+		$this->user_up_to_date = true;
 	}
 
 	/**
@@ -135,9 +142,11 @@ class Woopra {
 	 */
 	private function print_javascript_identification() {
 
-		$woopra_js_identify = "woopra.identify(".json_encode($this->user).");";
-		echo $woopra_js_identify;
-
+		if ( ! $this->user_up_to_date ) {
+			$woopra_js_identify = "woopra.identify(".json_encode($this->user).");";
+			echo $woopra_js_identify;
+			$this->user_up_to_date = true;
+		}
 	}
 
 	/**
@@ -218,8 +227,16 @@ class Woopra {
 			$url = $base_url . "ce/" . $config_params . $user_params . $event_params;
 		}
 
+		$opts = array(
+			'http'=>array(
+				'method'=>"GET",
+				'header'=>"User-Agent: ".$_SERVER['HTTP_USER_AGENT']
+		    )
+		);
+		$context = stream_context_create($opts);
+
 		//Send the request
-		file_get_contents( $url );
+		file_get_contents( $url, false, $context);
 	}
 
 	/**
@@ -227,7 +244,7 @@ class Woopra {
 	 * @param none
 	 * @return Woopra object
 	 */
-	public function woopra_widget() {
+	public function woopra_code() {
 
 		?>
 
@@ -283,9 +300,9 @@ class Woopra {
 		$this->custom_config = array();
 		foreach( $args as $option => $value) {
 
-			if ( array_key_exists($option, Woopra::$default_config) ) {
+			if ( array_key_exists($option, WoopraTracker::$default_config) ) {
 
-				if ( gettype($value) == gettype( Woopra::$default_config[$option] ) ) {
+				if ( gettype($value) == gettype( WoopraTracker::$default_config[$option] ) ) {
 					$this->custom_config[$option] = $value;
 					$this->current_config[$option] = $value;
 
@@ -321,19 +338,10 @@ class Woopra {
 	* @return Woopra object
 	* @param (optional) boolean
 	*/
-	public function identify($identified_user, $back_end_processing = false) {
+	public function identify($identified_user) {
 
 		$this->user = $identified_user;
-		if ( $back_end_processing ) {
-			$this->woopra_http_request(false);
-			return $this;
-		}
-
-		if ( $this->tracker_ready ) {
-			echo "<script>\n";
-			$this->print_javascript_identification();
-			echo "\n</script>\n";
-		}
+		$this->user_up_to_date = false;
 		return $this;
 	}
 
@@ -369,6 +377,7 @@ class Woopra {
 
 		if ( $this->tracker_ready ) {
 			echo "<script>\n";
+			$this->print_javascript_identification();
 			$this->print_javascript_events();
 			echo "</script>\n";
 		}
@@ -380,16 +389,33 @@ class Woopra {
 	* @param none
 	* @return none
 	*/
-	public function push() {
-		?>
+	public function push($back_end_processing = false) {
 
-		<script>
+		if ( $back_end_processing ) {
+			$this->woopra_http_request(false);
+			$this->user_up_to_date = true;
+		} else {
 
-			woopra.push();
+			?>
 
-		</script>
+			<script>
 
-		<?php
+				<?php $this->print_javascript_identification() ?>
+				woopra.push();
+
+			</script>
+
+			<?php
+		}
+	}
+
+	/**
+	* Sets the Woopra cookie from the back-end. Call this function before any headers are sent (HTTP restrictions).
+	* @param none
+	* @return none
+	*/
+	public function set_woopra_cookie() {
+		setcookie( $this->current_config["cookie_name"], $this->current_config["cookie_value"], time()+(60*60*24*365*2), $this->current_config["cookie_path"], $this->current_config["cookie_domain"] );
 	}
 }
 
