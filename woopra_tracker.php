@@ -132,11 +132,14 @@ class WoopraTracker {
 	 * @return none
 	 */
 	private function print_javascript_configuration() {
+		if (isset($this->custom_config)) {
+
 ?>
 		woopra.config(<?php echo json_encode($this->custom_config); ?>);
 <?php
-		//Configuration has been printed, reset the custom_configuration as an empty array
-		unset( $this->custom_config );
+			//Configuration has been printed, reset the custom_configuration as an empty array
+			unset( $this->custom_config );
+		}
 	}
 
 	/**
@@ -160,16 +163,16 @@ class WoopraTracker {
 	 */
 	private function print_javascript_events() {
 
-		$woopra_js_events = "";
-		foreach ($this->events as $event) {
+		if (isset($this->events)) {
+
+			foreach ($this->events as $event) {
 ?>
 		woopra.track(<?php echo json_encode($event[0]); ?>, <?php echo json_encode($event[1]); ?>); 
 <?php
+			}
+			//Events have been printed, reset the events as an empty array
+			unset( $this->events );
 		}
-
-		//Events have been printed, reset the events as an empty array
-		unset( $this->events );
-
 	}
 
 	/**
@@ -264,19 +267,13 @@ class WoopraTracker {
 		$this->tracker_ready = true;
 
 		//Print Custom JavaScript Configuration Code
-		if ( isset($this->custom_config) ) {
-			$this->print_javascript_configuration();
-		}
-
+		$this->print_javascript_configuration();
+		
 		//Print JavaScript Identification Code
-		if ( isset($this->user) ) {
-			$this->print_javascript_identification();
-		}
+		$this->print_javascript_identification();
 		
 		//Print stored events
-		if ( isset($this->events) ) {
-			$this->print_javascript_events();
-		}
+		$this->print_javascript_events();
 
 ?>
 	</script>
@@ -290,10 +287,9 @@ class WoopraTracker {
 	/**
 	* Configures Woopra
 	* @param array
-	* @param (optional) boolean
 	* @return Woopra object
 	*/
-	public function config($args, $back_end_processing = false) {
+	public function config($args) {
 
 		$this->custom_config = array();
 		foreach( $args as $option => $value) {
@@ -320,15 +316,6 @@ class WoopraTracker {
 				trigger_error("Unexpected parameter in configuration array: ".$option.".");
 			}
 		}
-		if ( $this->tracker_ready && ! $back_end_processing ) {
-?>
-	<script>
-<?php
-			$this->print_javascript_configuration();
-?>
-	<script>
-<?php
-		}
 		return $this;
 	}
 
@@ -336,7 +323,6 @@ class WoopraTracker {
 	* Identifies User
 	* @param array
 	* @return Woopra object
-	* @param (optional) boolean
 	*/
 	public function identify($identified_user) {
 
@@ -368,6 +354,7 @@ class WoopraTracker {
 ?>
 	<script>
 <?php
+				$this->print_javascript_configuration();
 				$this->print_javascript_identification();
 ?>
 		woopra.track();
@@ -386,6 +373,7 @@ class WoopraTracker {
 ?>
 	<script>
 <?php
+			$this->print_javascript_configuration();
 			$this->print_javascript_identification();
 			$this->print_javascript_events();
 ?>
@@ -398,6 +386,7 @@ class WoopraTracker {
 	/**
 	* Pushes unprocessed actions
 	* @param none
+	* @param (optional) boolean
 	* @return none
 	*/
 	public function push($back_end_processing = false) {
@@ -410,7 +399,8 @@ class WoopraTracker {
 ?>
 	<script>
 <?php
-			$this->print_javascript_identification()
+			$this->print_javascript_configuration();
+			$this->print_javascript_identification();
 ?>
 		woopra.push();
 	</script>
