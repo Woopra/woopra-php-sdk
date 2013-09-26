@@ -303,6 +303,7 @@ class WoopraTracker {
 					//If it's the domain also update the cookie_domain
 					if ( $option == "domain" ) {
 						if ($this->current_config["cookie_domain"] == "") {
+							$this->custom_config["cookie_domain"] = $value;
 							$this->current_config["cookie_domain"] = $value;
 						}
 					}
