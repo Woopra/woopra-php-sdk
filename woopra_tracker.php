@@ -166,9 +166,15 @@ class WoopraTracker {
 		if (isset($this->events)) {
 
 			foreach ($this->events as $event) {
+				if($event == "pv") {
+?>
+		woopra.track();
+<?php
+				} else {
 ?>
 		woopra.track(<?php echo json_encode($event[0]); ?>, <?php echo json_encode($event[1]); ?>); 
 <?php
+				}
 			}
 			//Events have been printed, reset the events as an empty array
 			unset( $this->events );
@@ -361,6 +367,11 @@ class WoopraTracker {
 		woopra.track();
 	</script>
 <?php
+			} else {
+				if (! isset($this->events) ) {
+					$this->events = array();
+				}
+				array_push( $this->events, "pv" );
 			}
 			return $this;
 		}
