@@ -108,9 +108,6 @@ class WoopraTracker {
 		//Tracker is not ready yet
 		$this->tracker_ready = false;
 
-		//Domain has not been set yet
-		$this->domain_was_set = false;
-
 		//Current configuration is Default
 		$this->current_config = WoopraTracker::$default_config;
 
@@ -121,16 +118,17 @@ class WoopraTracker {
 		$this->current_config["domain"] = $_SERVER["HTTP_HOST"];
 		$this->current_config["cookie_domain"] = $_SERVER["HTTP_HOST"];
 
-		//Get cookie or generate a random one
-		$this->current_config["cookie_value"] = isset($_COOKIE["wooTracker"]) ? $_COOKIE["wooTracker"] : WoopraTracker::RandomString();
-
-		//We don't have any info on the user yet, so he is up to date by default.
-		$this->user_up_to_date = true;
-
 		//If configuration array was passed, configure Woopra
 		if (isset($config_params)) {
 			$this->config($config_params);
 		}
+
+		//Get cookie or generate a random one
+		$this->current_config["cookie_value"] = isset($_COOKIE[$current_config["cookie_name"]]) ? $_COOKIE[$current_config["cookie_name"]] : WoopraTracker::RandomString();
+
+		//We don't have any info on the user yet, so he is up to date by default.
+		$this->user_up_to_date = true;
+
 	}
 
 	/**
@@ -403,7 +401,7 @@ class WoopraTracker {
 		if ( $back_end_processing ) {
 			$this->woopra_http_request(false);
 			$this->user_up_to_date = true;
-		} else {
+		} elseif($this->tracker_ready) {
 
 ?>
 	<script>
