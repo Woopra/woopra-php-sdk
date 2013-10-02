@@ -124,7 +124,7 @@ class WoopraTracker {
 		}
 
 		//Get cookie or generate a random one
-		$this->current_config["cookie_value"] = isset($_COOKIE[$current_config["cookie_name"]]) ? $_COOKIE[$current_config["cookie_name"]] : WoopraTracker::RandomString();
+		$this->current_config["cookie_value"] = isset($_COOKIE[$this->current_config["cookie_name"]]) ? $_COOKIE[$this->current_config["cookie_name"]] : WoopraTracker::RandomString();
 
 		//We don't have any info on the user yet, so he is up to date by default.
 		$this->user_up_to_date = true;
