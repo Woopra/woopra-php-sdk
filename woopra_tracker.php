@@ -112,7 +112,7 @@ class WoopraTracker {
 		$this->current_config = WoopraTracker::$default_config;
 
 		//Set the default IP
-		$this->current_config["ip_address"] = $_SERVER["REMOTE_ADDR"];
+		$this->current_config["ip_address"] = isset($_SERVER["HTTP_X_FORWARDED_FOR"]) ? $_SERVER["HTTP_X_FORWARDED_FOR"] : $_SERVER["REMOTE_ADDR"];
 		
 		//Set the domain name and the cookie_domain
 		$this->current_config["domain"] = $_SERVER["HTTP_HOST"];
@@ -307,8 +307,14 @@ class WoopraTracker {
 			if ( array_key_exists($option, WoopraTracker::$default_config) ) {
 
 				if ( gettype($value) == gettype( WoopraTracker::$default_config[$option] ) ) {
-					$this->custom_config[$option] = $value;
+					if ($option != "ip_address" && $option != "cookie_value") {
+						$this->custom_config[$option] = $value;
+					}
 					$this->current_config[$option] = $value;
+					//If the user is customizing the name of the cookie, check again if the user already has one.
+					if ($option == "cookie_name") {
+						$this->current_config["cookie_value"] = isset($_COOKIE[$current_config["cookie_name"]]) ? $_COOKIE[$current_config["cookie_name"]] : $this->current_config["cookie_value"];
+					}
 				}
 				else {
 					trigger_error("Wrong value type in configuration array for parameter ".$option.". Recieved ".gettype($value).", expected ".gettype( WoopraTracker::$default_config[$option] ).".");
