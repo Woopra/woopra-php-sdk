@@ -66,7 +66,3 @@ If you're only going to be tracking through the back-end, set the cookie (before
 ``` php
 $woopra->set_woopra_cookie();
 ```
-and to make sure you're sending you're user's IP, set it manually doing (if none if specified, the value of $_SERVER['REMOTE_ADDR'] will be used):
-``` php
-$woopra->config(array("ip_address" => "74.125.224.72"));
-```
