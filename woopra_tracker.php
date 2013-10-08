@@ -112,7 +112,7 @@ class WoopraTracker {
 		$this->current_config = WoopraTracker::$default_config;
 
 		//Set the default IP
-		$this->current_config["ip_address"] = isset($_SERVER["HTTP_X_FORWARDED_FOR"]) ? $_SERVER["HTTP_X_FORWARDED_FOR"] : $_SERVER["REMOTE_ADDR"];
+		$this->current_config["ip_address"] = $this->get_client_ip();
 		
 		//Set the domain name and the cookie_domain
 		$this->current_config["domain"] = $_SERVER["HTTP_HOST"];
@@ -428,6 +428,20 @@ class WoopraTracker {
 	*/
 	public function set_woopra_cookie() {
 		setcookie( $this->current_config["cookie_name"], $this->current_config["cookie_value"], time()+(60*60*24*365*2), $this->current_config["cookie_path"], $this->current_config["cookie_domain"] );
+	}
+
+	/**
+	* Retrieves the user's IP address
+	* @param none
+	* @return String
+	*/
+	private function get_client_ip() {
+		if (isset($_SERVER["HTTP_X_FORWARDED_FOR"])) {
+			$ips = explode(",", $_SERVER["HTTP_X_FORWARDED_FOR"]);
+			return $ips[0];
+		} else {
+			return $_SERVER["REMOTE_ADDR"];
+		}
 	}
 }
 
