@@ -438,7 +438,7 @@ class WoopraTracker {
 	private function get_client_ip() {
 		if (isset($_SERVER["HTTP_X_FORWARDED_FOR"])) {
 			$ips = explode(",", $_SERVER["HTTP_X_FORWARDED_FOR"]);
-			return $ips[0];
+			return trim($ips[0]);
 		} else {
 			return $_SERVER["REMOTE_ADDR"];
 		}
