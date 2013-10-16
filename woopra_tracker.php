@@ -8,6 +8,7 @@
  */
 class WoopraTracker {
 
+	private static $SDK_ID = "php_sdk";
 	/**
 	* Default configuration.
 	* KEYS:
@@ -227,7 +228,7 @@ class WoopraTracker {
 
 		//Just identifying
 		if ( ! $is_tracking ) {
-			$url = $base_url . "identify/" . $config_params . $user_params;
+			$url = $base_url . "identify/" . $config_params . $user_params . "&app=" . WoopraTracker::$SDK_ID;
 
 		//Tracking
 		} else {
@@ -242,7 +243,7 @@ class WoopraTracker {
 			} else {
 				$event_params .= "&ce_name=pv&ce_url=" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
 			}
-			$url = $base_url . "ce/" . $config_params . $user_params . $event_params;
+			$url = $base_url . "ce/" . $config_params . $user_params . $event_params . "&app=" . WoopraTracker::$SDK_ID;
 		}
 
 		$opts = array(
