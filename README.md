@@ -20,11 +20,11 @@ $woopra->identify(array(
    "company" => "User Business"
 ));
 ```
-If you wish to track page views, first call track(), and finally calling woopra_code() in your page header will insert the woopra javascript tracker:
+If you wish to track page views, first call track(), and finally calling js_code() in your page header will insert the woopra javascript tracker:
 ``` php
 <head>
    ...
-   <?php $woopra->track()->woopra_code(); ?>
+   <?php $woopra->track()->js_code(); ?>
 </head>
 
 ```
@@ -35,7 +35,7 @@ You can always track events through front-end later in the page. With all the pr
       ...
       <?php
          $woopra = new WoopraTracker($config);
-         $woopra->identify($user)->track()->woopra_code();
+         $woopra->identify($user)->track()->js_code();
       ?>
    </head>
    <body>
