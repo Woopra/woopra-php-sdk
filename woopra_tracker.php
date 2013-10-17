@@ -263,7 +263,7 @@ class WoopraTracker {
 	 * @param none
 	 * @return Woopra object
 	 */
-	public function woopra_code() {
+	public function js_code() {
 
 ?>
 	
