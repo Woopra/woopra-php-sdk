@@ -119,6 +119,9 @@ class WoopraTracker {
 		$this->current_config["domain"] = $_SERVER["HTTP_HOST"];
 		$this->current_config["cookie_domain"] = $_SERVER["HTTP_HOST"];
 
+		//configure app ID
+		$this->custom_config = array("app" => WoopraTracker::$SDK_ID);
+
 		//If configuration array was passed, configure Woopra
 		if (isset($config_params)) {
 			$this->config($config_params);
@@ -228,7 +231,7 @@ class WoopraTracker {
 
 		//Just identifying
 		if ( ! $is_tracking ) {
-			$url = $base_url . "identify/" . $config_params . $user_params . "&ce__w_app=" . WoopraTracker::$SDK_ID;
+			$url = $base_url . "identify/" . $config_params . $user_params . "&app=" . WoopraTracker::$SDK_ID;
 
 		//Tracking
 		} else {
@@ -243,7 +246,7 @@ class WoopraTracker {
 			} else {
 				$event_params .= "&ce_name=pv&ce_url=" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
 			}
-			$url = $base_url . "ce/" . $config_params . $user_params . $event_params . "&ce__w_app=" . WoopraTracker::$SDK_ID;
+			$url = $base_url . "ce/" . $config_params . $user_params . $event_params . "&app=" . WoopraTracker::$SDK_ID;
 		}
 
 		$opts = array(
@@ -302,7 +305,9 @@ class WoopraTracker {
 	*/
 	public function config($args) {
 
-		$this->custom_config = array();
+		if (! isset($this->custom_config)) {
+			$this->custom_config = array();
+		}
 		foreach( $args as $option => $value) {
 
 			if ( array_key_exists($option, WoopraTracker::$default_config) ) {
