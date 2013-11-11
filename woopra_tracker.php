@@ -250,7 +250,19 @@ class WoopraTracker {
 		}
 
 		//Send the request
-		$this->get_data($url);
+		if (function_exists('curl_version')) {
+			$this->get_data($url);
+		} else {
+			$opts = array(
+				'http'=>array(
+					'method'=>"GET",
+					'header'=>"User-Agent: ".$_SERVER['HTTP_USER_AGENT']
+			    )
+			);
+			$context = stream_context_create($opts);
+			file_get_contents( $url, false, $context);
+		}
+		
 	}
 
 	/**
