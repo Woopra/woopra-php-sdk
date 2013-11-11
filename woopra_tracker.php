@@ -249,16 +249,8 @@ class WoopraTracker {
 			$url = $base_url . "ce/" . $config_params . $user_params . $event_params . "&ce_app=" . WoopraTracker::$SDK_ID;
 		}
 
-		$opts = array(
-			'http'=>array(
-				'method'=>"GET",
-				'header'=>"User-Agent: ".$_SERVER['HTTP_USER_AGENT']
-		    )
-		);
-		$context = stream_context_create($opts);
-
 		//Send the request
-		file_get_contents( $url, false, $context);
+		$this->get_data($url);
 	}
 
 	/**
@@ -448,6 +440,23 @@ class WoopraTracker {
 		} else {
 			return $_SERVER["REMOTE_ADDR"];
 		}
+	}
+
+	/** 
+	* Gets the data from a URL using CURL
+	* @param String
+	* @return String
+	*/
+	private function get_data($url) {
+		$ch = curl_init();
+		$timeout = 5;
+		curl_setopt($ch, CURLOPT_URL, $url);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+		curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $timeout);
+		curl_setopt($ch, CURLOPT_USERAGENT, $_SERVER['HTTP_USER_AGENT']);
+		$data = curl_exec($ch);
+		curl_close($ch);
+		return $data;
 	}
 }
 
