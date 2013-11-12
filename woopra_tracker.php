@@ -120,6 +120,7 @@ class WoopraTracker {
 		$this->current_config["cookie_domain"] = $_SERVER["HTTP_HOST"];
 
 		//configure app ID
+		$this->current_config["app"] = WoopraTracker::$SDK_ID;
 		$this->custom_config = array("app" => WoopraTracker::$SDK_ID);
 
 		//If configuration array was passed, configure Woopra
@@ -231,7 +232,7 @@ class WoopraTracker {
 
 		//Just identifying
 		if ( ! $is_tracking ) {
-			$url = $base_url . "identify/" . $config_params . $user_params . "&ce_app=" . WoopraTracker::$SDK_ID;
+			$url = $base_url . "identify/" . $config_params . $user_params . "&ce_app=" . $this->current_config["app"];
 
 		//Tracking
 		} else {
@@ -246,7 +247,7 @@ class WoopraTracker {
 			} else {
 				$event_params .= "&ce_name=pv&ce_url=" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
 			}
-			$url = $base_url . "ce/" . $config_params . $user_params . $event_params . "&ce_app=" . WoopraTracker::$SDK_ID;
+			$url = $base_url . "ce/" . $config_params . $user_params . $event_params . "&ce_app=" . $this->current_config["app"];
 		}
 
 		//Send the request
