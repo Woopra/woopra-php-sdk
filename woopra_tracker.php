@@ -45,7 +45,8 @@ class WoopraTracker {
 		"ignore_query_url" => true,
 		"hide_campaign" => false,
 		"ip_address" => "",
-		"cookie_value" => ""
+		"cookie_value" => "",
+		"app" => ""
 	);
 
 	/**
