@@ -348,6 +348,9 @@ class WoopraTracker {
 
 		$this->user = $identified_user;
 		$this->user_up_to_date = false;
+		if (isset($identified_user["email"]) && !isset($_COOKIE[$this->current_config["cookie_name"]])) {
+			$this->current_config["cookie_value"] = crc32($identified_user["email"]);
+		}
 		return $this;
 	}
 
