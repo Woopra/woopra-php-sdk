@@ -227,7 +227,9 @@ class WoopraTracker {
 		$user_params = "";
 		if ( isset($this->user) ) {
 			foreach($this->user as $option => $value) {
-				$user_params .= "&cv_" . urlencode($option) . "=" . urlencode($value);
+				if (! (empty($option) || empty($value))) {
+					$user_params .= "&cv_" . urlencode($option) . "=" . urlencode($value);
+				}
 			}
 		}
 
@@ -243,7 +245,9 @@ class WoopraTracker {
 			if ( $event != null ) {
 				$event_params .= "&ce_name=" . urlencode($event[0]);
 				foreach($event[1] as $option => $value) {
-					$event_params .= "&ce_" . urlencode($option) . "=" . urlencode($value);
+					if (! (empty($option) || empty($value))) {
+						$event_params .= "&ce_" . urlencode($option) . "=" . urlencode($value);
+					}
 				}
 			} else {
 				$event_params .= "&ce_name=pv&ce_url=" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
@@ -345,11 +349,12 @@ class WoopraTracker {
 	* @return Woopra object
 	*/
 	public function identify($identified_user, $override = false) {
-
-		$this->user = $identified_user;
-		$this->user_up_to_date = false;
-		if (isset($identified_user["email"]) && ($override || !isset($_COOKIE[$this->current_config["cookie_name"]]))) {
-			$this->current_config["cookie_value"] = crc32($identified_user["email"]);
+		if(isset($identified_user["email"]) && ! empty($identified_user["email"])) {
+			$this->user = $identified_user;
+			$this->user_up_to_date = false;
+			if ($override || !isset($_COOKIE[$this->current_config["cookie_name"]])) {
+				$this->current_config["cookie_value"] = crc32($identified_user["email"]);
+			}
 		}
 		return $this;
 	}
