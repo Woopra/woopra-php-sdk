@@ -61,7 +61,7 @@ class WoopraTracker {
 	* Default configuration array, updated by Manual configurations.
 	* @var array
 	*/
-	private $current_config;
+	public $current_config;
 
 	/**
 	* User array.
