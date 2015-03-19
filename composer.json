@@ -1,7 +1,19 @@
 {
-    "name": "woopra/woopra-php-sdk",
-    "description": "Woopra.com PHP SDK",
-    "authors": [ ],
+    "name": "woopra/woopra",
+    "type": "library",
+    "description": "Woopra.com PHP Library",
+    "keywords": ["woopra", "analytics"],
+    "homepage": "https://github.com/Woopra/woopra-php-sdk",
+    "authors": [
+        {
+            "name": "Antoine Chkaiban",
+            "email": "antoine.chkaiban@student.ecp.fr"
+        },
+        {
+            "name": "Billy Vong",
+            "email": "billy@woopra.com"
+        }
+    ],
     "autoload": {
         "classmap": ["woopra_tracker.php"]
     }
