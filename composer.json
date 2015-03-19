@@ -1,0 +1,8 @@
+{
+    "name": "woopra/woopra-php-sdk",
+    "description": "Woopra.com PHP SDK",
+    "authors": [ ],
+    "autoload": {
+        "classmap": ["woopra_tracker.php"]
+    }
+}
