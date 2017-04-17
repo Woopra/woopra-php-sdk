@@ -2,8 +2,11 @@ Track customers directly in PHP using Woopra's PHP SDK
 
 The purpose of this SDK is to allow our customers who have servers running PHP to track their users by writing only PHP code. Tracking directly in PHP will allow you to decide whether you want to track your users:
 - through the front-end: after configuring the tracker, identifying the user, and tracking page views and events in PHP, the SDK will generate the corresponding JavaScript code, and you will be able to print that code in your pages' headers.
-- through the back-end: after configuring the tracker & identifying the user, add the optional parameter TRUE to the methods <code>track</code> or <code>push</code>, and the PHP tracker will handle sending the data to Woopra by making HTTP Requests. By doing that, the client is never involved in the tracking process.
+- through the back-end: 
+    - NEW Backend Tracker: Instantiate the WoopraTracker class only from the woopra_backend_tracker.php file.  Follow instructions below for "Backend Tracking"
+    - DEPRECATED: after configuring the tracker & identifying the user, add the optional parameter TRUE to the methods <code>track</code> or <code>push</code>, and the PHP tracker will handle sending the data to Woopra by making HTTP Requests. By doing that, the client is never involved in the tracking process.
 
+# Configuration
 The best way to install Woopra/Woopra-php-sdk is using [Composer](getcomposer.org)
 
 ``` sh
@@ -13,6 +16,7 @@ $ composer require woopra/woopra-php-sdk
 The first step is to setup the tracker SDK. To do so, import the woopra_tracker.php file then configure the tracker instance as follows (replace mybusiness.com with your website as registered on Woopra):
 ``` php
 require_once('woopra_tracker.php');
+// require('wopra_backend_tracker.php'); //For backend-only tracking, instantiate per visitor per request.
 // require_once('vendor/autoload.php'); // for composer installation
 $woopra = new WoopraTracker(array("domain" => "mybusiness.com"));
 ```
@@ -24,6 +28,8 @@ If you don't want to keep the user online on Woopra when they don't commit any e
 ``` php
 $woopra->config(array("ping" => false)); // default is true
 ```
+
+# Client Side Tracking and Deprecated Backend tracking
 To add custom visitor properties, you should use the identify($user) function:
 ``` php
 $woopra->identify(array(
@@ -64,7 +70,7 @@ You can always track events through front-end later in the page. With all the pr
    </body>
 </html>
 ```
-To track a custom event through back-end, just specify the additional parameter TRUE in the track() functions.
+DEPRECATED: To track a custom event through back-end, just specify the additional parameter TRUE in the track() functions.
 ``` php
 $woopra->track($event_name, $event_properties, TRUE);
 ```
@@ -72,9 +78,14 @@ If you identify the user after the last tracking event, don't forget to push() t
 ``` php
 $woopra->identify($user)->push();
 //or, to push through back-end:
-$woopra->identify($user)->push(TRUE);
+$woopra->identify($user)->push(TRUE); //DEPRECATED
 ```
 If you're only going to be tracking through the back-end, set the cookie (before the headers are sent):
 ``` php
 $woopra->set_woopra_cookie();
 ```
+
+# Backend Tracking
+In Order to Improve the backend tracking capabilities of this SDK, we have implemented a separate class for backend tracking.  It does not print to the client, and it exposes more of the low level tracking customizations available in the base HTTP Tracking API.  
+
+
