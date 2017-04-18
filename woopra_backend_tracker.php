@@ -76,17 +76,26 @@ class WoopraTracker {
 
 	public function track($eventName, $eventData, $metaData){
                 $url="http://www.woopra.com/track/ce";
-                $url=$url."?website".urlencode($this->config["domain"]);
+                $url=$url."?website=".urlencode($this->config["domain"]);
+
                 foreach($this->visitor_data as $key => $value) {
                         $url.="&cv_".$key."=".$value;
                 }
-		$url=$url."&event=".urlencode($eventName);
+
+                $url=$url."&event=".urlencode($eventName);
 		foreach($eventData as $key => $value) {
                         $url.="&ce_".urlencode($key)."=".urlencode($value);
                 }
-		if(isset($metaData)){
+
+                if(isset($metaData)){
 			if(isset($metaData["timestamp"])){
 				$url.="&timestamp=".$metaData["timestamp"];
+			}
+                        if(isset($metaData["referer"])){
+				$url.="&referer=".$metaData["referer"];
+			}
+                        if(isset($metaData["referrer"])){
+				$url.="&referer=".$metaData["referrer"];
 			}
 		}
                 echo $url;
@@ -100,9 +109,9 @@ class WoopraTracker {
 }
 
 
-$tracker = new WoopraTracker("woopra.com");
+$tracker = new WoopraTracker("ralphsamuel.io");
 $tracker->addVisitorProperty("name", "tigi");
 $tracker->push();
-$tracker->track("play", array("title"=>"TITLE"), array("timestamp"=>123));
+$tracker->track("play", array("title"=>"TITLE"), array("timestamp"=>123, "referer"=>"docs.woopra.com"));
 
 ?>
