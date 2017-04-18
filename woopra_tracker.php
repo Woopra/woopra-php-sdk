@@ -31,7 +31,7 @@ class WoopraTracker {
 	* @var array
 	*/
 	private static $default_config = array(
-		"domain" => "", 
+		"domain" => "",
 		"cookie_name" => "wooTracker",
 		"cookie_domain" => "",
 		"cookie_path" => "/",
@@ -98,7 +98,7 @@ class WoopraTracker {
 	* @var boolean
 	*/
 	private $tracker_ready;
-	
+
 	/**
 	 * Woopra Analytics
 	 * @param none
@@ -115,7 +115,7 @@ class WoopraTracker {
 
 		//Set the default IP
 		$this->current_config["ip_address"] = $this->get_client_ip();
-		
+
 		//Set the domain name and the cookie_domain
 		$this->current_config["domain"] = $_SERVER["HTTP_HOST"];
 		$this->current_config["cookie_domain"] = $_SERVER["HTTP_HOST"];
@@ -182,7 +182,7 @@ class WoopraTracker {
 <?php
 				} else {
 ?>
-		woopra.track(<?php echo json_encode($event[0]); ?>, <?php echo json_encode($event[1]); ?>); 
+		woopra.track(<?php echo json_encode($event[0]); ?>, <?php echo json_encode($event[1]); ?>);
 <?php
 				}
 			}
@@ -247,6 +247,10 @@ class WoopraTracker {
 				foreach($event[1] as $option => $value) {
 					if (! (empty($option) || empty($value))) {
 						$event_params .= "&ce_" . urlencode($option) . "=" . urlencode($value);
+						//also add referrer without prefix for woopra to pick up
+						if ($option == "referer" || $option == "referrer") {
+							$event_params .= "&referer=" . urlencode($value);
+						}
 					}
 				}
 			} else {
@@ -268,7 +272,7 @@ class WoopraTracker {
 			$context = stream_context_create($opts);
 			file_get_contents( $url, false, $context);
 		}
-		
+
 	}
 
 	/**
@@ -279,7 +283,7 @@ class WoopraTracker {
 	public function js_code() {
 
 ?>
-	
+
 	<!-- Woopra code starts here -->
 	<script>
 		(function(){
@@ -292,17 +296,17 @@ class WoopraTracker {
 
 		//Print Custom JavaScript Configuration Code
 		$this->print_javascript_configuration();
-		
+
 		//Print JavaScript Identification Code
 		$this->print_javascript_identification();
-		
+
 		//Print stored events
 		$this->print_javascript_events();
 
 ?>
 	</script>
 	<!-- Woopra code ends here -->
-	
+
 <?php
 		return $this;
 
@@ -349,14 +353,17 @@ class WoopraTracker {
 	* @return Woopra object
 	*/
 	public function identify($identified_user, $override = false) {
-		if(isset($identified_user["email"]) && ! empty($identified_user["email"])) {
+		if (!empty($identified_user)) {
 			$this->user = $identified_user;
 			$this->user_up_to_date = false;
-			if ($override || !isset($_COOKIE[$this->current_config["cookie_name"]])) {
-				$this->current_config["cookie_value"] = crc32($identified_user["email"]);
+
+			if(isset($identified_user["email"]) && ! empty($identified_user["email"])) {
+				if ($override || !isset($_COOKIE[$this->current_config["cookie_name"]])) {
+					$this->current_config["cookie_value"] = crc32($identified_user["email"]);
+				}
 			}
+			return $this;
 		}
-		return $this;
 	}
 
 	/**
@@ -464,7 +471,7 @@ class WoopraTracker {
 		}
 	}
 
-	/** 
+	/**
 	* Gets the data from a URL using CURL
 	* @param String
 	* @return String
