@@ -4,7 +4,7 @@ The purpose of this SDK is to allow our customers who have servers running PHP t
 - through the front-end: after configuring the tracker, identifying the user, and tracking page views and events in PHP, the SDK will generate the corresponding JavaScript code, and you will be able to print that code in your pages' headers.
 - through the back-end: after configuring the tracker & identifying the user, add the optional parameter TRUE to the methods <code>track</code> or <code>push</code>, and the PHP tracker will handle sending the data to Woopra by making HTTP Requests. By doing that, the client is never involved in the tracking process.
 
-The best way to install Woopra/Woopra-php-sdk is using [Composer](getcomposer.org)
+The best way to install Woopra/Woopra-php-sdk is using [Composer](https://getcomposer.org/)
 
 ``` sh
 $ composer require woopra/woopra-php-sdk
