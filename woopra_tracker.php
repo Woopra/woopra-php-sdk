@@ -235,7 +235,7 @@ class WoopraTracker {
 
 		//Just identifying
 		if ( ! $is_tracking ) {
-			$url = $base_url . "identify/" . $config_params . $user_params . "&ce_app=" . $this->current_config["app"];
+			$url = $base_url . "identify/" . $config_params . $user_params . "&app=" . $this->current_config["app"];
 
 		//Tracking
 		} else {
@@ -256,7 +256,7 @@ class WoopraTracker {
 			} else {
 				$event_params .= "&ce_name=pv&ce_url=" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
 			}
-			$url = $base_url . "ce/" . $config_params . $user_params . $event_params . "&ce_app=" . $this->current_config["app"];
+			$url = $base_url . "ce/" . $config_params . $user_params . $event_params . "&app=" . $this->current_config["app"];
 		}
 
 		//Send the request
