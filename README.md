@@ -7,7 +7,7 @@ The purpose of this SDK is to allow our customers who have servers running PHP t
 The best way to install Woopra/Woopra-php-sdk is using [Composer](https://getcomposer.org/)
 
 ``` sh
-$ composer require woopra/woopra-php-sdk
+$ composer require woopra/woopra:dev-master
 ```
 
 The first step is to setup the tracker SDK. To do so, import the woopra_tracker.php file then configure the tracker instance as follows (replace mybusiness.com with your website as registered on Woopra):
