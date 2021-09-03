@@ -243,7 +243,7 @@ class WoopraTracker {
 			//Event params
 			$event_params = "";
 			if ( $event != null ) {
-				$event_params .= "&ce_name=" . urlencode($event[0]);
+				$event_params .= "&event=" . urlencode($event[0]);
 				foreach($event[1] as $option => $value) {
 					if (! (empty($option) || empty($value))) {
 						$event_params .= "&ce_" . urlencode($option) . "=" . urlencode($value);
@@ -254,7 +254,7 @@ class WoopraTracker {
 					}
 				}
 			} else {
-				$event_params .= "&ce_name=pv&ce_url=" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+				$event_params .= "&event=pv&ce_url=" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
 			}
 			$url = $base_url . "ce/" . $config_params . $user_params . $event_params . "&app=" . $this->current_config["app"];
 		}
