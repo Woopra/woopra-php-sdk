@@ -333,7 +333,7 @@ class WoopraTracker {
 					$this->current_config[$option] = $value;
 					//If the user is customizing the name of the cookie, check again if the user already has one.
 					if ($option == "cookie_name") {
-						$this->current_config["cookie_value"] = isset($_COOKIE[$current_config["cookie_name"]]) ? $_COOKIE[$current_config["cookie_name"]] : $this->current_config["cookie_value"];
+						$this->current_config["cookie_value"] = isset($_COOKIE[$this->current_config["cookie_name"]]) ? $_COOKIE[$this->current_config["cookie_name"]] : $this->current_config["cookie_value"];
 					}
 				}
 				else {
